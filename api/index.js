@@ -1,11 +1,18 @@
 const { PrismaClient } = require("@prisma/client")
-
 const prisma = new PrismaClient()
 
-async function run(){
-    const users = await prisma.user.findMany()
+const emailer = require('./email')
 
-    console.log(users)
+const utils = require('utils')
+utils.initEnv()
+
+async function run(){
+    emailer.initialize()
+    const email = "johnmichaeldc@gmail.com"
+    const userMethod = require('./methods/user')
+    const { rawCode } = await userMethod.generateEmailCode(email)
+    await utils.wait()
+    await userMethod.loginUser(email, rawCode)
 }
 
 run()

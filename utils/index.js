@@ -1,3 +1,5 @@
 module.exports = {
-    ...require('./init-env')
+    wait: (length = 1000) => new Promise(resolve => setTimeout(resolve, length)),
+    ...require('./generate-code'),
+    ...require('./init-env'),
 }
