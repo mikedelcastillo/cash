@@ -8,17 +8,18 @@ generator client {
 }
 
 model User {
-  id       String  @id
-  email    String  @unique
-  username String?
+  id    String  @id
+  email String  @unique
+  name  String?
 
   deactivated Boolean @default(false)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime?
 
-  chatMessages ChatMessage[]
-  userLogins   UserLogin[]
+  chatMessages    ChatMessage[]
+  userLogins      UserLogin[]
+  trackingPeriods TrackingPeriod[]
 }
 
 model EmailCode {
@@ -37,6 +38,48 @@ model UserLogin {
   user      User     @relation(fields: [userId], references: [id])
   userId    String
   createdAt DateTime @default(now())
+}
+
+model TrackingPeriod {
+  id       String    @id
+  currency String    @default("₱")
+  start    DateTime  @default(now())
+  end      DateTime?
+
+  active Boolean @default(false)
+  user   User    @relation(fields: [userId], references: [id])
+  userId String
+
+  periodBudget Int           @default(500)
+  periodDays   Int           @default(7)
+  periodOffset Int           @default(0)
+  transactions Transaction[]
+}
+
+model Transaction {
+  id String @id
+
+  caption String?
+  amount  Decimal @default(0)
+  valid   Boolean @default(true)
+
+  date DateTime @default(now())
+
+  trackingPeriod   TrackingPeriod @relation(fields: [trackingPeriodId], references: [id])
+  trackingPeriodId String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+}
+
+model UserPlatform {
+  id       Int          @id @default(autoincrement())
+  platform ChatPlatform
+
+  chatUserId String @unique
+
+  lastActive DateTime @default(now())
+  createdAt  DateTime @default(now())
 }
 
 model ChatMessage {

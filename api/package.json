@@ -18,7 +18,7 @@
     "prisma:pull": "npm run prisma -- db pull",
     "prisma:push": "npm run prisma -- db push",
     "prisma:format": "npm run prisma -- format",
-    "prisma:update": "npm run prisma:push && npm run prisma:generate && npm run prisma:format"
+    "prisma:update": "npm run prisma:format && npm run prisma:push && npm run prisma:generate"
   },
   "prisma": {
     "schema": "./prisma/schema.prisma"

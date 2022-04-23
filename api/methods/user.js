@@ -82,6 +82,7 @@ const getLastEmailCode = async function(email, success){
     }))[0]
 }
 
+// TODO: Allow multiple email code at one time
 const generateEmailCode = async function(email){
     const now = new Date().getTime()
 
