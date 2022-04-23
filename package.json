@@ -1,0 +1,10 @@
+{
+  "name": "cash",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:mikedelcastillo/cash.git",
+  "author": "Mike del Castillo",
+  "license": "MIT",
+  "private": true,
+  "workspaces": ["api", "web", "bot", "discord", "telegram"]
+}
