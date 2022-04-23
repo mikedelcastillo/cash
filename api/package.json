@@ -4,6 +4,19 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@prisma/client": "^3.12.0",
     "express": "^4.17.3"
+  },
+  "scripts": {
+    "prisma": "npx dotenv-cli -e ../.env npx prisma",
+    "prisma:generate": "npm run prisma -- generate",
+    "prisma:migrate": "npm run prisma -- migrate dev",
+    "prisma:pull": "npm run prisma -- db pull",
+    "prisma:push": "npm run prisma -- db push",
+    "prisma:format": "npm run prisma -- format",
+    "prisma:update": "npm run prisma:push && npm run prisma:generate && npm run prisma:format"
+  },
+  "prisma": {
+    "schema": "./prisma/schema.prisma"
   }
 }
