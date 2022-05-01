@@ -10,9 +10,9 @@ async function run(){
     emailer.initialize()
     const email = "johnmichaeldc@gmail.com"
     const userMethod = require('./methods/user')
-    const { rawCode } = await userMethod.generateEmailCode(email)
+    const { emailCodeId, rawCode } = await userMethod.generateEmailCode(email, "test")
     await utils.wait()
-    await userMethod.loginUser(email, rawCode)
+    await userMethod.loginUser(emailCodeId, rawCode)
 }
 
 run()

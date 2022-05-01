@@ -10,19 +10,16 @@ const createUser = async function(email){
 
 }
 
-const loginUser = async function(email, code){
+const loginUser = async function(emailCodeId, code){
     const now = new Date().getTime()
 
-    const lastEmailCode = await getLastEmailCode(email, false)
-    if(lastEmailCode){
-        if(now - lastEmailCode.createdAt.getTime() > utils.CODE_EXPIRY){
-            throw Error(`Log in took too long. Please log in again.`)
-        }
-    } else{
-        throw Error(`No valid login request exists. Please log in again.`)
-    }
-
-    const valid = await argon2.verify(lastEmailCode.code, code)
+    const emailCode = await prisma.emailCode.findFirst({
+        where: {
+            id: emailCodeId,
+        },
+    })
+    
+    const valid = await argon2.verify(emailCode.code, code)
     
     if(!valid){
         throw Error(`Code is incorrect`)
@@ -32,11 +29,15 @@ const loginUser = async function(email, code){
     
     const getUser = () => prisma.user.findFirst({
         where: {
-            email,
+            email: emailCodeId.email,
         },
     })
 
     user = await getUser()
+
+    if(user.deactivated){
+        throw Error("User account deactivated")
+    }
 
     if(!user){
         await prisma.user.create({
@@ -49,8 +50,6 @@ const loginUser = async function(email, code){
         user = await getUser()
     }
 
-    console.log(user)
-
     await prisma.userLogin.create({
         data: {
             userId: user.id,
@@ -59,7 +58,7 @@ const loginUser = async function(email, code){
 
     await prisma.emailCode.update({
         where: {
-            id: lastEmailCode.id,
+            id: emailCode.id,
         },
         data: {
             success: true,
@@ -70,23 +69,21 @@ const loginUser = async function(email, code){
     return valid
 }
 
-const getLastEmailCode = async function(email, success){
-    return (await prisma.emailCode.findMany({
+// TODO: Allow multiple email code at one time
+const generateEmailCode = async function(email, context){
+    const now = new Date().getTime()
+
+    const lastEmailCode = (await prisma.emailCode.findMany({
         where: {
-            success,
+            success: false,
+            context,
         },
         orderBy: {
             createdAt: 'desc',
         },
         take: 1,
     }))[0]
-}
 
-// TODO: Allow multiple email code at one time
-const generateEmailCode = async function(email){
-    const now = new Date().getTime()
-
-    const lastEmailCode = await getLastEmailCode(email, false)
     if(lastEmailCode){
         if(now - lastEmailCode.createdAt.getTime() <= utils.CODE_EXPIRY){
             throw Error(`A login code has recently been sent. Try again later.`)
@@ -110,20 +107,22 @@ const generateEmailCode = async function(email){
         throw Error(`Could not send code to email.`)
     }
 
+    const emailCodeId = uuid4()
+
     await prisma.emailCode.create({
         data: {
-            id: uuid4(),
+            id: emailCodeId,
             email,
             code: hashedCode,
+            context,
         },
     })
 
-    return { rawCode }
+    return { rawCode, emailCodeId }
 }
 
 module.exports = {
     createUser,
     loginUser,
-    getLastEmailCode,
     generateEmailCode,
 }

@@ -17,9 +17,10 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime?
 
-  chatMessages    ChatMessage[]
-  userLogins      UserLogin[]
-  trackingPeriods TrackingPeriod[]
+  chatMessages      ChatMessage[]
+  userLogins        UserLogin[]
+  trackingPeriods   TrackingPeriod[]
+  userChatPlatforms UserChatPlatform[]
 }
 
 model EmailCode {
@@ -28,6 +29,7 @@ model EmailCode {
   code  String
 
   success Boolean @default(false)
+  context String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime?
@@ -50,10 +52,13 @@ model TrackingPeriod {
   user   User    @relation(fields: [userId], references: [id])
   userId String
 
-  periodBudget Int           @default(500)
-  periodDays   Int           @default(7)
-  periodOffset Int           @default(0)
+  periodBudget Int @default(500)
+  periodDays   Int @default(7)
+
   transactions Transaction[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
 }
 
 model Transaction {
@@ -72,26 +77,30 @@ model Transaction {
   updatedAt DateTime?
 }
 
-model UserPlatform {
-  id       Int          @id @default(autoincrement())
-  platform ChatPlatform
+model UserChatPlatform {
+  id           Int          @id @default(autoincrement())
+  chatPlatform ChatPlatform
 
   chatUserId String @unique
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 
   lastActive DateTime @default(now())
   createdAt  DateTime @default(now())
 }
 
 model ChatMessage {
-  id        String       @id @unique
-  platform  ChatPlatform
-  context   String
-  user      User         @relation(fields: [userId], references: [id])
-  userId    String
-  createdAt DateTime     @default(now())
+  id           String       @id @unique
+  chatPlatform ChatPlatform
+  context      String
+  user         User         @relation(fields: [userId], references: [id])
+  userId       String
+  createdAt    DateTime     @default(now())
 }
 
 enum ChatPlatform {
   DISCORD
   TELEGRAM
+  WEH
 }
